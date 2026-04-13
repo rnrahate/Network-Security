@@ -5,8 +5,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-MONGO_DB_URL = os.getenv("MongoDB_URL")
-print(MONGO_DB_URL)
+MONGO_DB_URL = os.getenv("MONGO_DB_URL") or os.getenv("MongoDB_URL")
 
 import certifi
 ca = certifi.where()
