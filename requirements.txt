@@ -1,13 +1,16 @@
 certifi==2026.2.25
+dill==0.4.1
 dnspython==2.8.0
 joblib==1.5.3
--e git+https://github.com/rnrahate/Network-Security.git@7eef8f546ae3410a0ecd324093581521af40ca85#egg=network_security
+-e git+https://github.com/rnrahate/Network-Security.git@fdb6557e875dc14871ba52e67f2e8bb275a53688#egg=network_security
 numpy==2.2.6
 pandas==2.3.3
+pyaml==26.2.1
 pymongo==4.16.0
 python-dateutil==2.9.0.post0
 python-dotenv==1.2.2
 pytz==2026.1.post1
+PyYAML==6.0.3
 scikit-learn==1.7.2
 scipy==1.15.3
 six==1.17.0
