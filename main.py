@@ -1,12 +1,16 @@
 import sys
+import mlflow
 from network_security.components.data_ingestion import DataIngestion
 from network_security.components.data_validation import DataValidation
 from network_security.components.data_transformation import DataTransformation
-from network_security.entity.config_entity import TrainingPipelineConfig, DataIngestionConfig, DataValidationConfig, DataTransformationConfig
+from network_security.components.model_trainer import ModelTrainer
+from network_security.entity.config_entity import TrainingPipelineConfig, DataIngestionConfig, DataValidationConfig, DataTransformationConfig, ModelTrainerConfig
 from network_security.exception.exception import NetworkSecurityException
 from network_security.logging.logger import logging
 
 if __name__ == "__main__":
+    # Set MLFlow tracking URI to use SQLite backend
+    mlflow.set_tracking_uri("sqlite:///mlflow.db")
     try:
         # Initialize the training pipeline configuration
         training_pipeline_config = TrainingPipelineConfig()
@@ -37,6 +41,15 @@ if __name__ == "__main__":
         logging.info(f"Data Transformation completed successfully")
         print(f"Data Transformation Artifact: {data_transformation_artifact}")
         logging.info(f"Data Transformation Artifact: {data_transformation_artifact}")
-        
+
+        # Initialize and run model trainer and model evaluation
+        logging.info(f"{'>>'*20} Model Trainer {'<<'*20}")
+        model_trainer_config = ModelTrainerConfig(training_pipeline_config=training_pipeline_config)
+        model_trainer = ModelTrainer(model_trainer_config=model_trainer_config, data_transformation_artifact=data_transformation_artifact)
+        model_trainer_artifact = model_trainer.initiate_model_trainer()
+        logging.info(f"Model Trainer completed successfully")
+        print(f"Model Trainer Artifact: {model_trainer_artifact}")
+        logging.info(f"Model Trainer Artifact: {model_trainer_artifact}")
+
     except Exception as e:
         raise NetworkSecurityException(e, sys) from e
