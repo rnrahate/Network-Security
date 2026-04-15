@@ -1,5 +1,6 @@
+import os
 import sys
-import mlflow
+
 from network_security.components.data_ingestion import DataIngestion
 from network_security.components.data_validation import DataValidation
 from network_security.components.data_transformation import DataTransformation
@@ -7,11 +8,17 @@ from network_security.components.model_trainer import ModelTrainer
 from network_security.entity.config_entity import TrainingPipelineConfig, DataIngestionConfig, DataValidationConfig, DataTransformationConfig, ModelTrainerConfig
 from network_security.exception.exception import NetworkSecurityException
 from network_security.logging.logger import logging
+from dotenv import load_dotenv
+load_dotenv()
 
 if __name__ == "__main__":
-    # Set MLFlow tracking URI to use SQLite backend
-    mlflow.set_tracking_uri("sqlite:///mlflow.db")
     try:
+        if not os.getenv("DAGSHUB_USER_TOKEN"):
+            raise EnvironmentError(
+                "Missing DAGSHUB_USER_TOKEN. Configure your DagsHub access token "
+                "in the environment before running the training pipeline."
+            )
+
         # Initialize the training pipeline configuration
         training_pipeline_config = TrainingPipelineConfig()
 

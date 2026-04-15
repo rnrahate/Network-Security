@@ -56,7 +56,3 @@ MODEL_TRAINER_TRAINED_MODEL_DIR: str = "trained_model"
 MODEL_FILE_NAME: str = "best_model.pkl"
 MODEL_TRAINER_EXPECTED_SCORE: float = 0.6
 MODEL_TRAINER_OVERFIITING_UNDERFITTING_THRESHOLD: float = 0.05
-
-"""
-Model evaluation related start with MODEL_EVALUATION VAR_NAME
-"""

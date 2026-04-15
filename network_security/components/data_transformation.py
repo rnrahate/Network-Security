@@ -78,6 +78,10 @@ class DataTransformation:
             save_pickle_object(file_path=preprocessor_object_file_path, obj=preprocessor_object)
             logging.info(f"Saved transformed train and test array and preprocessor object")
 
+            final_model_dir = os.path.join(os.getcwd(), "final_model")
+            save_pickle_object(os.path.join(final_model_dir, "preprocessor.pkl"), preprocessor_object)
+            logging.info(f"Saved preprocessing object to final model folder: {final_model_dir}")
+
             # prepare artifact
             data_transformation_artifact = DataTransformationArtifact(
                     transformed_train_file_path=transformed_train_file_path,

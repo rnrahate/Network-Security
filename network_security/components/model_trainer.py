@@ -19,6 +19,7 @@ from sklearn.ensemble import (
 )
 import mlflow
 import mlflow.sklearn as mlflow_sklearn
+import dagshub
 
 class ModelTrainer:
     def __init__(self, model_trainer_config:ModelTrainerConfig, data_transformation_artifact:DataTransformationArtifact):
@@ -29,9 +30,32 @@ class ModelTrainer:
         except Exception as e:
             raise NetworkSecurityException(e, sys) from e
     
+    def _configure_remote_mlflow(self):
+        try:
+            dagshub.init(
+                repo_owner="rnrahate",
+                repo_name="Network-Security",
+                mlflow=True
+            )
+            tracking_uri = mlflow.get_tracking_uri()
+            logging.info(f"MLflow tracking URI configured as: {tracking_uri}")
+
+            if tracking_uri.startswith("file:") or tracking_uri.startswith("sqlite:"):
+                raise ValueError(
+                    f"MLflow is still using a local tracking backend: {tracking_uri}"
+                )
+
+            return tracking_uri
+        except Exception as e:
+            raise NetworkSecurityException(
+                "DagsHub MLflow tracking configuration failed. "
+                "Set DAGSHUB_USER_TOKEN in your environment and rerun the pipeline.",
+                sys
+            ) from e
+
     def track_mlflow(self, model, classification_train_metric, classification_test_metric):
         logging.info(f"Tracking model training metrics with MLflow")
-        mlflow.set_tracking_uri("sqlite:///mlflow.db")
+        tracking_uri = self._configure_remote_mlflow()
         mlflow.set_experiment("Network_Security_Experiment")
         with mlflow.start_run():
             # Log training metrics
@@ -47,7 +71,10 @@ class ModelTrainer:
             mlflow.log_metric("test_accuracy_score", classification_test_metric.accuracy_score)
             
             mlflow_sklearn.log_model(model, "best_model")
-        logging.info(f"Model training metrics tracked with MLflow: test_accuracy={classification_test_metric.accuracy_score}")
+        logging.info(
+            f"Model training metrics tracked with MLflow at {tracking_uri}: "
+            f"test_accuracy={classification_test_metric.accuracy_score}"
+        )
 
     def train_model(self, X_train, y_train,X_test, y_test):
         models = {
@@ -118,6 +145,10 @@ class ModelTrainer:
         Network_Model = NetworkModel(preprocessor=preprocessor, model=best_model)
         save_pickle_object(self.model_trainer_config.trained_model_file_path, obj=Network_Model)
         logging.info(f"Best model saved at {self.model_trainer_config.trained_model_file_path} with model name: {best_model_name}")
+
+        final_model_dir = os.path.join(os.getcwd(), "final_model")
+        save_pickle_object(os.path.join(final_model_dir, "model.pkl"), best_model)
+        logging.info(f"Saved best model to final model folder: {final_model_dir}")
 
         # model trainer artifact
         model_trainer_artifact = ModelTrainerArtifact(

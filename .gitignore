@@ -208,3 +208,8 @@ __marimo__/
 
 .sixth
 .sixth/
+
+# MLflow / DagsHub local tracking leftovers
+mlruns/
+mlartifacts/
+mlflow.db
