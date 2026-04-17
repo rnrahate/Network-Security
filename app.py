@@ -24,13 +24,6 @@ from network_security.utils.main_utils.utils import load_pickle_object
 from network_security.utils.ml_utils.model.estimator import NetworkModel
 import pandas as pd
 
-client = pymongo.MongoClient(mongo_db_url, tlsCAFile=ca)
-
-from network_security.constants.training_pipeline import DATA_INGESTION_COLLECTION_NAME,DATA_INGESTION_DATABASE_NAME
-
-database = client[DATA_INGESTION_DATABASE_NAME]
-collection = database[DATA_INGESTION_COLLECTION_NAME]
-
 app = FastAPI()
 origin = ["*"]
 app.add_middleware(
@@ -44,6 +37,9 @@ app.add_middleware(
 from fastapi.templating import Jinja2Templates
 templates = Jinja2Templates(directory="./templates")
 
+def get_mongo_client():
+    return pymongo.MongoClient(mongo_db_url, tlsCAFile=ca)
+
 @app.get("/",tags=["Authentication"])
 async def index():
     return RedirectResponse(url="/docs")
@@ -51,6 +47,10 @@ async def index():
 @app.get("/train",tags=["Training"])
 async def train_route():
     try:
+        # Check connection before starting
+        with get_mongo_client() as client:
+            client.server_info()
+            
         training_pipeline_config = TrainingPipelineConfig()
         train_pipeline = TrainingPipeline(training_pipeline_config=training_pipeline_config)
         train_pipeline.run_pipeline()

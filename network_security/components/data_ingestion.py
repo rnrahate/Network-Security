@@ -13,6 +13,9 @@ from typing import List
 from sklearn.model_selection import train_test_split
 
 from dotenv import load_dotenv
+import certifi
+ca = certifi.where()
+
 load_dotenv()
 MONGO_DB_URL = os.getenv("MONGO_DB_URL") or os.getenv("MongoDB_URL")
 if not MONGO_DB_URL:
@@ -29,7 +32,7 @@ class DataIngestion:
     def export_collection_as_dataframe(self, collection_name:str, database_name:str) -> pd.DataFrame:
         try:
             logging.info(f"Exporting collection data as pandas dataframe")
-            with pymongo.MongoClient(MONGO_DB_URL, serverSelectionTimeoutMS=5000) as client:
+            with pymongo.MongoClient(MONGO_DB_URL, serverSelectionTimeoutMS=5000, tlsCAFile=ca) as client:
                 client.server_info() # to check if connection is successful or not
                 db = client[database_name]
                 collection = db[collection_name]
